@@ -1,1 +1,1 @@
-# ResQAI services package
+ from . import ai_service
