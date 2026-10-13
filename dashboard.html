@@ -1,0 +1,61 @@
+{% extends "base.html" %}{% from "_macros.html" import incident_row %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p class="muted">Statistics come from this application's database. {{ stats.demo }} of {{ stats.total }} records are <strong>DEMO DATA</strong>.</p>
+
+<div class="grid cols-4 stats" id="stats">
+  <div class="card stat"><p class="stat-n">{{ stats.total }}</p><p>Total reports</p></div>
+  <div class="card stat"><p class="stat-n">{{ stats.pending }}</p><p>Pending verification</p></div>
+  <div class="card stat"><p class="stat-n teal">{{ stats.verified }}</p><p>Verified by a reviewer</p></div>
+  <div class="card stat"><p class="stat-n">{{ stats.resolved }}</p><p>Marked resolved</p></div>
+</div>
+
+<div class="grid cols-2">
+  <section class="card" aria-labelledby="catchart">
+    <h2 id="catchart">Reports by category</h2>
+    <div class="chart-box"><canvas id="cat-chart" aria-label="Bar chart of reports by category" role="img"></canvas></div>
+    <table class="mini" id="cat-table"><caption class="sr">Reports by category</caption>
+      <tbody>{% for k, n in stats.by_category.items() %}<tr><th scope="row">{{ k }}</th><td>{{ n }}</td></tr>{% endfor %}</tbody></table>
+  </section>
+  <section class="card" aria-labelledby="statchart">
+    <h2 id="statchart">Status distribution</h2>
+    <div class="bars" id="status-bars" data-total="{{ stats.total }}">
+      {% for k, n in stats.by_status.items() %}
+      <div class="bar-row"><span>{{ k }}</span><div class="bar"><i data-w="{{ (n * 100 // stats.total) if stats.total else 0 }}"></i></div><b>{{ n }}</b></div>
+      {% endfor %}
+    </div>
+    <p class="muted small">Rejected reports are counted here but hidden from public lists and the map.</p>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="wx">
+  <h2 id="wx">Weather and official alerts</h2>
+  <div class="grid cols-2">
+    <div id="weather" aria-live="polite"><p class="muted">Loading weather for {{ weather_default }}…</p></div>
+    <div class="alert-box">
+      <h3>Official warnings</h3>
+      <p>ResQAI does <strong>not</strong> receive or republish official alerts. Weather above is model data from Open-Meteo and is not a warning. For official warnings use:</p>
+      <ul><li><a href="https://mausam.imd.gov.in" rel="noopener noreferrer" target="_blank">India Meteorological Department</a></li><li><a href="https://sachet.ndma.gov.in" rel="noopener noreferrer" target="_blank">NDMA SACHET alerts</a></li><li><a href="https://tnsdma.tn.gov.in" rel="noopener noreferrer" target="_blank">Tamil Nadu SDMA</a></li></ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="list">
+  <h2 id="list">Incident reports</h2>
+  <form class="filters" method="get" action="{{ url_for('dashboard') }}">
+    <label>Search<input type="search" name="q" value="{{ filters.q or '' }}" maxlength="80" placeholder="Title, place or ID"></label>
+    <label>Category<select name="category"><option value="">All</option>{% for c in CATEGORIES %}<option {% if filters.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+    <label>Status<select name="status"><option value="">All</option>{% for s in STATUSES if s != 'Rejected' %}<option {% if filters.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+    <label>From<input type="date" name="date_from" value="{{ filters.date_from or '' }}"></label>
+    <label>To<input type="date" name="date_to" value="{{ filters.date_to or '' }}"></label>
+    <div class="filter-actions"><button class="btn primary" type="submit">Apply filters</button><a class="btn" href="{{ url_for('dashboard') }}">Clear</a></div>
+  </form>
+  {% if incidents %}<ul class="incident-list">{% for i in incidents %}{{ incident_row(i) }}{% endfor %}</ul>
+  {% else %}<p class="empty">No reports match these filters. Try clearing them, or <a href="{{ url_for('report') }}">submit a report</a>.</p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+{% endblock %}

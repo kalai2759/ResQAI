@@ -1,0 +1,67 @@
+"""Live weather from Open-Meteo (https://open-meteo.com). No API key is needed for non-commercial use.
+
+If the service cannot be reached we return an 'unavailable' result. We never invent weather values.
+"""
+import logging
+import threading
+import time
+from datetime import datetime, timezone
+
+import requests
+
+log = logging.getLogger("resqai.weather")
+URL = "https://api.open-meteo.com/v1/forecast"
+SOURCE = "Open-Meteo (open-meteo.com) - model data, not an official warning"
+
+WMO = {0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Fog", 48: "Rime fog",
+       51: "Light drizzle", 53: "Drizzle", 55: "Dense drizzle", 61: "Light rain", 63: "Rain", 65: "Heavy rain",
+       80: "Light rain showers", 81: "Rain showers", 82: "Violent rain showers", 95: "Thunderstorm",
+       96: "Thunderstorm with hail", 99: "Severe thunderstorm with hail"}
+
+_cache = {}
+_lock = threading.Lock()
+
+
+def _unavailable(reason):
+    return {"available": False, "message": reason, "source": SOURCE,
+            "retrieved_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")}
+
+
+def clear_cache():
+    with _lock:
+        _cache.clear()
+
+
+def get_weather(lat, lon, name, timeout=6, cache_seconds=600):
+    key = (round(lat, 2), round(lon, 2))
+    with _lock:
+        hit = _cache.get(key)
+        if hit and time.time() - hit[0] < cache_seconds:
+            return hit[1]
+    try:
+        resp = requests.get(URL, timeout=timeout, params={
+            "latitude": lat, "longitude": lon, "timezone": "auto",
+            "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code"})
+        if resp.status_code == 429:
+            return _unavailable("The weather service is rate limiting requests. Try again later.")
+        if resp.status_code != 200:
+            return _unavailable(f"The weather service returned HTTP {resp.status_code}.")
+        cur = resp.json().get("current")
+        if not isinstance(cur, dict) or not isinstance(cur.get("temperature_2m"), (int, float)):
+            return _unavailable("The weather service returned an unexpected response.")
+        result = {
+            "available": True, "location": name, "source": SOURCE,
+            "retrieved_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+            "observed_at": cur.get("time"),
+            "temperature_c": cur.get("temperature_2m"), "humidity_pct": cur.get("relative_humidity_2m"),
+            "precipitation_mm": cur.get("precipitation"), "wind_kmh": cur.get("wind_speed_10m"),
+            "condition": WMO.get(cur.get("weather_code"), "Unknown conditions"),
+        }
+    except requests.Timeout:
+        return _unavailable("The weather service timed out.")
+    except (requests.RequestException, ValueError) as exc:
+        log.warning("Weather request failed: %s", type(exc).__name__)
+        return _unavailable("Live weather could not be loaded.")
+    with _lock:
+        _cache[key] = (time.time(), result)
+    return result

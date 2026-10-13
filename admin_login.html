@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Admin sign-in{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>Admin sign-in</h1>
+  <p class="muted">For demo administrators only. Administrators can review reports and change their status.</p>
+  <form class="card form" method="post" action="{{ url_for('admin_login') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
+    <label>Username<input name="username" required maxlength="60" autocomplete="username"></label>
+    <label>Password<input name="password" type="password" required maxlength="200" autocomplete="current-password"></label>
+    <button class="btn primary" type="submit">Sign in</button>
+  </form>
+</section>
+{% endblock %}

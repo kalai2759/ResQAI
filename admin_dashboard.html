@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% from "_macros.html" import incident_row %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="section-head"><h1>Admin: review reports</h1>
+  <form method="post" action="{{ url_for('admin_logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn" type="submit">Sign out</button></form></div>
+<p class="muted">Signed in as <strong>{{ admin_user }}</strong>. Contact details are visible only on this side.</p>
+<div class="grid cols-4 stats">
+  <div class="card stat"><p class="stat-n">{{ stats.total }}</p><p>Total</p></div>
+  <div class="card stat"><p class="stat-n">{{ stats.pending }}</p><p>Pending</p></div>
+  <div class="card stat"><p class="stat-n teal">{{ stats.verified }}</p><p>Verified</p></div>
+  <div class="card stat"><p class="stat-n">{{ stats.resolved }} / {{ stats.rejected }}</p><p>Resolved / Rejected</p></div>
+</div>
+<form class="filters" method="get" action="{{ url_for('admin_dashboard') }}">
+  <label>Search<input type="search" name="q" value="{{ filters.q or '' }}" maxlength="80"></label>
+  <label>Category<select name="category"><option value="">All</option>{% for c in CATEGORIES %}<option {% if filters.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <label>Status<select name="status"><option value="">All</option>{% for s in STATUSES %}<option {% if filters.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+  <label>From<input type="date" name="date_from" value="{{ filters.date_from or '' }}"></label>
+  <label>To<input type="date" name="date_to" value="{{ filters.date_to or '' }}"></label>
+  <div class="filter-actions"><button class="btn primary" type="submit">Apply filters</button><a class="btn" href="{{ url_for('admin_dashboard') }}">Clear</a></div>
+</form>
+{% if incidents %}<ul class="incident-list">{% for i in incidents %}{{ incident_row(i, admin=True) }}{% endfor %}</ul>
+{% else %}<p class="empty">No reports match these filters.</p>{% endif %}
+{% endblock %}

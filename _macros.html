@@ -1,0 +1,15 @@
+{% macro status_badge(status) %}
+<span class="badge st-{{ status|lower|replace(' ', '-') }}">{{ status }}</span>
+{% endmacro %}
+{% macro demo_badge(inc) %}{% if inc.is_demo %}<span class="badge demo">DEMO DATA</span>{% endif %}{% endmacro %}
+{% macro sev_badge(sev) %}<span class="badge sev-{{ sev|lower }}">{{ sev }}</span>{% endmacro %}
+{% macro field_error(errors, name) %}{% if errors and errors.get(name) %}<p class="field-error" id="err-{{ name }}" role="alert">{{ errors[name] }}</p>{% endif %}{% endmacro %}
+{% macro incident_row(i, admin=False) %}
+<li class="incident">
+  <div class="incident-main">
+    <a class="incident-title" href="{{ url_for('admin_incident' if admin else 'report_detail', incident_id=i.incident_id) }}">{{ i.title }}</a>
+    <p class="muted">{{ i.location_name }} · {{ i.category }} · <time>{{ i.created_at[:10] }}</time> · <code>{{ i.incident_id }}</code></p>
+  </div>
+  <div class="incident-tags">{{ demo_badge(i) }}{{ sev_badge(i.severity) }}{{ status_badge(i.status) }}</div>
+</li>
+{% endmacro %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<h1>About ResQAI</h1>
+<p class="lead">ResQAI - <em>Smarter Response. Safer Lives.</em> - is a hackathon prototype that brings preparedness information, community incident reports, a map and an AI assistant together.</p>
+<div class="grid cols-2">
+  <section class="card"><h2>What it is</h2><p>A web application for students, community members, volunteers and organisations to learn how to prepare for disasters, report local incidents, see them on a map and find official emergency resources.</p></section>
+  <section class="card"><h2>What it is not</h2><ul><li>Not an official emergency service.</li><li>Cannot dispatch rescue teams or contact emergency services.</li><li>Does not issue or republish official alerts.</li><li>Does not say whether roads or shelters are safe or open.</li></ul></section>
+  <section class="card"><h2>Honest status of data</h2><ul><li>Records labelled <strong>DEMO DATA</strong> are fictional.</li><li>Reports are unverified until an administrator changes their status.</li><li>Helpline numbers are publicly listed but not independently verified here.</li><li>Weather is live model data from Open-Meteo when reachable, otherwise a clear "unavailable" message.</li></ul></section>
+  <section class="card"><h2>AI assistant</h2><p>With an API key configured on the server it uses an AI model for general guidance. Without one it runs in a labelled demo mode with predefined answers. It never replaces official warnings or emergency professionals.</p></section>
+  <section class="card"><h2>Emergency numbers (India)</h2><p>Call <strong>112</strong> for any emergency. Confirm numbers on official sources, see the <a href="{{ url_for('resources') }}">resources page</a>.</p></section>
+  <section class="card"><h2>Built with</h2><p>Python, Flask, SQLite, Leaflet and OpenStreetMap, Chart.js, Open-Meteo, plain HTML, CSS and JavaScript.</p></section>
+</div>
+{% endblock %}

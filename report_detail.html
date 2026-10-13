@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_macros.html" import status_badge, sev_badge, demo_badge %}
+{% block title %}{{ incident.incident_id }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('dashboard') }}">← Dashboard</a></p>
+<article class="card detail">
+  <div class="incident-tags">{{ demo_badge(incident) }}{{ sev_badge(incident.severity) }}{{ status_badge(incident.status) }}</div>
+  <h1>{{ incident.title }}</h1>
+  <p class="muted"><code>{{ incident.incident_id }}</code></p>
+  <dl class="facts">
+    <div><dt>Category</dt><dd>{{ incident.category }}</dd></div>
+    <div><dt>Location</dt><dd>{{ incident.location_name }}</dd></div>
+    <div><dt>Coordinates</dt><dd>{% if incident.latitude is not none %}{{ incident.latitude }}, {{ incident.longitude }}{% else %}Not provided{% endif %}</dd></div>
+    <div><dt>Reported</dt><dd>{{ incident.created_at }}</dd></div>
+    <div><dt>Last updated</dt><dd>{{ incident.updated_at }}</dd></div>
+  </dl>
+  <h2>Description</h2>
+  <p class="prewrap">{{ incident.description }}</p>
+  <p class="muted small">
+    {% if incident.status == 'Verified' %}A reviewer marked this report as verified.
+    {% elif incident.status == 'Pending Verification' %}This report has <strong>not</strong> been verified. Treat it as unconfirmed.
+    {% elif incident.status == 'Rejected' %}A reviewer rejected this report.
+    {% else %}A reviewer marked this report as resolved.{% endif %}
+    Reporter details are private.
+  </p>
+</article>
+{% endblock %}

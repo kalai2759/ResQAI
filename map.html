@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Disaster Map{% endblock %}
+{% block head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">{% endblock %}
+{% block content %}
+<h1>Disaster map</h1>
+<p class="muted">Community reports are <strong>unverified</strong> unless marked Verified by a reviewer. The map does not show whether any road is safe or unsafe. Records marked DEMO DATA are fictional samples in Chennai.</p>
+<form class="filters" id="map-filters">
+  <label>Category<select id="f-category"><option value="">All</option>{% for c in CATEGORIES %}<option>{{ c }}</option>{% endfor %}</select></label>
+  <label>Status<select id="f-status"><option value="">All</option>{% for s in STATUSES if s != 'Rejected' %}<option>{{ s }}</option>{% endfor %}</select></label>
+  <label class="check"><input type="checkbox" id="f-resources" checked> Show emergency resources</label>
+</form>
+<div class="map-layout">
+  <div id="map" role="application" aria-label="Interactive map of incident reports and emergency resources"></div>
+  <aside class="card map-side">
+    <h2>Legend</h2>
+    <ul class="legend">
+      <li><span class="dot verified"></span> Verified by a reviewer</li>
+      <li><span class="dot pending"></span> Pending verification (unverified)</li>
+      <li><span class="dot resolved"></span> Resolved</li>
+      <li><span class="dot resource"></span> Emergency resource (sample/demo unless stated)</li>
+    </ul>
+    <p class="muted small" id="map-status" role="status">Loading map data…</p>
+    <p class="muted small">Map tiles © OpenStreetMap contributors.</p>
+  </aside>
+</div>
+<section aria-labelledby="listview">
+  <h2 id="listview">List view</h2>
+  <p class="muted small" id="no-coords-note"></p>
+  <ul class="incident-list" id="map-list"></ul>
+  <p class="empty" id="map-empty" hidden>No reports match the selected filters.</p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script src="{{ url_for('static', filename='js/map.js') }}" defer></script>
+{% endblock %}

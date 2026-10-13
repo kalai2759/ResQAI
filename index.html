@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% from "_macros.html" import incident_row %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <h1>Be ready before the water rises.</h1>
+    <p class="lead">ResQAI helps communities prepare for floods and storms, report local problems, see them on a map and find official help - all in one place.</p>
+    <p class="callout"><strong>Heavy rain or flood warning?</strong> Follow official instructions first. Check IMD and your state disaster authority, and call 112 if anyone is in danger.</p>
+    <div class="actions">
+      <a class="btn primary" href="{{ url_for('dashboard') }}">Open dashboard</a>
+      <a class="btn" href="{{ url_for('report') }}">Report an incident</a>
+    </div>
+  </div>
+  <aside class="board" aria-label="Report summary from this application's database">
+    <h2>Reports in this system</h2>
+    <dl class="ledger">
+      <div><dt>Total</dt><dd>{{ stats.total }}</dd></div>
+      <div><dt>Awaiting verification</dt><dd>{{ stats.pending }}</dd></div>
+      <div><dt>Verified by a reviewer</dt><dd>{{ stats.verified }}</dd></div>
+      <div><dt>Resolved</dt><dd>{{ stats.resolved }}</dd></div>
+    </dl>
+    <p class="muted small">{{ stats.demo }} of {{ stats.total }} records are <strong>DEMO DATA</strong> (fictional samples).</p>
+  </aside>
+</section>
+
+<section aria-labelledby="feat">
+  <h2 id="feat">What you can do</h2>
+  <div class="grid cols-3">
+    <article class="card"><h3>Report incidents</h3><p>Describe flooding, blocked roads or damage. Every report gets an ID you can look up later.</p><a href="{{ url_for('report') }}">Make a report</a></article>
+    <article class="card"><h3>See the map</h3><p>Browse reports and emergency resources on an interactive map, with a list view alongside.</p><a href="{{ url_for('map_page') }}">Open the map</a></article>
+    <article class="card"><h3>Ask the assistant</h3><p>Get general preparedness tips. It works in a clearly labelled demo mode without any API key.</p><a href="{{ url_for('assistant') }}">Ask a question</a></article>
+    <article class="card"><h3>Track the numbers</h3><p>Filter reports by category, status, date or keyword, with a live chart.</p><a href="{{ url_for('dashboard') }}">View dashboard</a></article>
+    <article class="card"><h3>Find official help</h3><p>Helplines and official bodies with their sources, and a reminder to verify before relying on them.</p><a href="{{ url_for('resources') }}">Browse resources</a></article>
+    <article class="card"><h3>Review safely</h3><p>Only signed-in demo administrators can change a report's status. Nothing is called "verified" until a reviewer does it.</p><a href="{{ url_for('admin_login') }}">Admin sign-in</a></article>
+  </div>
+</section>
+
+<section aria-labelledby="recent">
+  <div class="section-head"><h2 id="recent">Recent reports</h2><a href="{{ url_for('dashboard') }}">All reports</a></div>
+  {% if recent %}<ul class="incident-list">{% for i in recent %}{{ incident_row(i) }}{% endfor %}</ul>
+  {% else %}<p class="empty">No reports yet. <a href="{{ url_for('report') }}">Submit the first one.</a></p>{% endif %}
+</section>
+
+<section aria-labelledby="quick">
+  <div class="section-head"><h2 id="quick">Quick access: emergency numbers</h2><a href="{{ url_for('resources') }}">Full directory</a></div>
+  <div class="grid cols-4">
+    {% for r in quick %}<div class="card number-card"><p class="number">{{ r.phone }}</p><p>{{ r.name.split(' - ')[-1] }}</p></div>{% endfor %}
+  </div>
+  <p class="muted small">Publicly listed numbers; not independently verified in this build. Confirm with official sources.</p>
+</section>
+
+<section class="disclaimer" aria-labelledby="disc">
+  <h2 id="disc">Important</h2>
+  <p>ResQAI is a student hackathon prototype. It is <strong>not</strong> an official emergency service, cannot dispatch rescue teams and cannot contact emergency services. Reports are community-submitted and unverified until a reviewer changes their status.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% from "_macros.html" import field_error %}
+{% block title %}Report Incident{% endblock %}
+{% block content %}
+<h1>Report an incident</h1>
+<p class="muted">Use this form for local problems such as flooding or blocked roads. Reports are stored as <strong>Pending Verification</strong>. <strong>This is not an emergency line</strong> - if someone is in danger, call 112.</p>
+
+<section class="card lookup" aria-labelledby="lk">
+  <h2 id="lk">Look up a report by ID</h2>
+  <form method="get" action="{{ url_for('report_lookup') }}" class="inline-form">
+    <label>Incident ID<input name="incident_id" required maxlength="30" placeholder="RQ-20260101-A1B2C3" pattern="[Rr][Qq]-[0-9]{8}-[0-9A-Fa-f]{6}"></label>
+    <button class="btn" type="submit">Find report</button>
+  </form>
+  {% if lookup_error %}<p class="field-error" role="alert">{{ lookup_error }}</p>{% endif %}
+</section>
+
+<form class="card form" method="post" action="{{ url_for('report') }}" novalidate id="report-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if errors %}<div class="flash error" role="alert">Please fix the highlighted fields.{% if errors.form %} {{ errors.form }}{% endif %}</div>{% endif %}
+
+  <label>Incident title *<input name="title" maxlength="120" required value="{{ form.get('title', '') }}" aria-describedby="err-title">{{ field_error(errors, 'title') }}</label>
+  <div class="row">
+    <label>Category *<select name="category" required aria-describedby="err-category"><option value="">Choose…</option>{% for c in CATEGORIES %}<option {% if form.get('category') == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>{{ field_error(errors, 'category') }}</label>
+    <label>Severity *<select name="severity" required aria-describedby="err-severity"><option value="">Choose…</option>{% for s in SEVERITIES %}<option {% if form.get('severity') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>{{ field_error(errors, 'severity') }}</label>
+  </div>
+  <label>Description *<textarea name="description" rows="5" maxlength="2000" required aria-describedby="err-description">{{ form.get('description', '') }}</textarea>{{ field_error(errors, 'description') }}</label>
+  <label>Location name *<input name="location_name" maxlength="150" required value="{{ form.get('location_name', '') }}" placeholder="Street, area or landmark" aria-describedby="err-location_name">{{ field_error(errors, 'location_name') }}</label>
+  <div class="row">
+    <label>Latitude (optional)<input name="latitude" inputmode="decimal" value="{{ form.get('latitude', '') }}" placeholder="13.0827" aria-describedby="err-latitude">{{ field_error(errors, 'latitude') }}</label>
+    <label>Longitude (optional)<input name="longitude" inputmode="decimal" value="{{ form.get('longitude', '') }}" placeholder="80.2707" aria-describedby="err-longitude">{{ field_error(errors, 'longitude') }}</label>
+  </div>
+  <p><button type="button" class="btn small" id="use-location">Use my current location</button> <span class="muted small" id="geo-msg">Optional. Your browser will ask permission first.</span></p>
+  <div class="row">
+    <label>Your name (optional)<input name="reporter_name" maxlength="80" value="{{ form.get('reporter_name', '') }}" autocomplete="name">{{ field_error(errors, 'reporter_name') }}</label>
+    <label>Contact (optional)<input name="reporter_contact" maxlength="120" value="{{ form.get('reporter_contact', '') }}" autocomplete="off">{{ field_error(errors, 'reporter_contact') }}</label>
+  </div>
+  <p class="muted small">Your name and contact are never shown publicly. Only signed-in administrators can see them.</p>
+  <button class="btn primary" type="submit">Submit report</button>
+</form>
+{% endblock %}

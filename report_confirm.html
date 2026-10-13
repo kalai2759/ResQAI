@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Report received{% endblock %}
+{% block content %}
+<section class="center-panel">
+  <p class="tick" aria-hidden="true">✔</p>
+  <h1>Report received</h1>
+  <p>Your report is stored as <strong>Pending Verification</strong>. That means no reviewer has checked it yet.</p>
+  <p>Your incident ID:</p>
+  <p class="big-id"><code>{{ incident.incident_id }}</code></p>
+  <p class="muted">Save this ID to look the report up later. ResQAI cannot send help. If anyone is in danger, call <strong>112</strong>.</p>
+  <p><a class="btn primary" href="{{ url_for('report_detail', incident_id=incident.incident_id) }}">View report</a> <a class="btn" href="{{ url_for('map_page') }}">Open map</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Emergency Resources{% endblock %}
+{% block content %}
+<h1>Emergency resources</h1>
+<div class="callout"><strong>Verify before you rely on this.</strong> Numbers and websites below are publicly listed ones, but they have <strong>not been independently verified</strong> in this build. Before a real deployment, confirm each entry on its official source and record the date. Records marked DEMO DATA are fictional placeholders. ResQAI does not know whether any shelter is open.</div>
+<form class="filters" method="get" action="{{ url_for('resources') }}">
+  <label>Search<input type="search" name="q" value="{{ q }}" maxlength="80" placeholder="Name or description"></label>
+  <label>Type<select name="type"><option value="">All types</option>{% for t in RESOURCE_TYPES %}<option {% if rtype == t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
+  <div class="filter-actions"><button class="btn primary" type="submit">Apply filters</button><a class="btn" href="{{ url_for('resources') }}">Clear</a></div>
+</form>
+{% if resources %}
+<div class="grid cols-2">
+  {% for r in resources %}
+  <article class="card resource">
+    <div class="incident-tags"><span class="badge type">{{ r.type }}</span>{% if r.is_demo %}<span class="badge demo">DEMO DATA</span>{% endif %}</div>
+    <h2>{{ r.name }}</h2>
+    {% if r.description %}<p>{{ r.description }}</p>{% endif %}
+    {% if r.phone %}<p class="number small-number"><a href="tel:{{ r.phone }}">{{ r.phone }}</a></p>{% endif %}
+    {% if r.address %}<p class="muted">{{ r.address }}</p>{% endif %}
+    <p class="muted small">Source: {{ r.source or 'Unknown' }}{% if r.source_url %} · <a href="{{ r.source_url }}" rel="noopener noreferrer" target="_blank">{{ r.source_url|replace('https://','') }}</a>{% endif %}<br>
+      Last verified: {{ r.last_verified or 'Not verified in this build' }}</p>
+    {% if r.status_note %}<p class="muted small">{{ r.status_note }}</p>{% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% else %}<p class="empty">No resources match your search. Clear the filters to see everything.</p>{% endif %}
+{% endblock %}
