@@ -15,7 +15,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import validation as v
 from config import Config
 from database import Database
-from services import ai_service, weather_service
+try:
+    from services import ai_service
+except ImportError:
+    import ai_service
+
+try:
+    from services import weather_service
+except ImportError:
+    weather_service = None
 
 log = logging.getLogger("resqai")
 DUMMY_HASH = generate_password_hash("not-a-real-password")
