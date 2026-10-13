@@ -216,12 +216,19 @@ def create_app(test_config=None):
         return jsonify(db.stats())
 
     @app.get("/api/weather")
-    @rate_limit("weather", 30, 60)
-    def api_weather():
-        c = app.config
-        return jsonify(weather_service.get_weather(c["WEATHER_DEFAULT_LAT"], c["WEATHER_DEFAULT_LON"],
-                                                   c["WEATHER_DEFAULT_NAME"], c["WEATHER_TIMEOUT"],
-                                                   c["WEATHER_CACHE_SECONDS"]))
+@rate_limit("weather", 30, 60)
+def api_weather():
+    if weather_service is None:
+        return jsonify(error="Weather service is temporarily unavailable."), 503
+
+    c = app.config
+    return jsonify(weather_service.get_weather(
+        c["WEATHER_DEFAULT_LAT"],
+        c["WEATHER_DEFAULT_LON"],
+        c["WEATHER_DEFAULT_NAME"],
+        c["WEATHER_TIMEOUT"],
+        c["WEATHER_CACHE_SECONDS"]
+    ))
 
     @app.post("/api/chat")
     @rate_limit("chat", 12, 60)
